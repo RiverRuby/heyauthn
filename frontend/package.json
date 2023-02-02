@@ -26,6 +26,7 @@
     "typescript": "4.9.5"
 =======
     "@next/font": "^13.1.6",
+    "@passwordless-id/webauthn": "^1.2.0",
     "@radix-ui/react-accessible-icon": "^1.0.1",
     "@radix-ui/react-accordion": "^1.1.0",
     "@radix-ui/react-alert-dialog": "^1.0.2",

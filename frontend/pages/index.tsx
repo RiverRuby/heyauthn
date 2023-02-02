@@ -1,6 +1,7 @@
 import Head from "next/head"
 import Link from "next/link"
 import { useSemaphore } from "@/contexts/SemaphoreProvider"
+import useWebAuthn from "@/hooks/useWebAuthn"
 
 import { siteConfig } from "@/config/site"
 import { Layout } from "@/components/layout"
@@ -8,6 +9,8 @@ import { buttonVariants } from "@/components/ui/button"
 
 export default function IndexPage() {
   const { group, userId } = useSemaphore()
+  const { onAuthenticate } = useWebAuthn()
+  onAuthenticate()
   return (
     <Layout>
       <Head>

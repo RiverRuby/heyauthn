@@ -501,6 +501,11 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@passwordless-id/webauthn@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@passwordless-id/webauthn/-/webauthn-1.2.0.tgz#5f0f921eb370b21058b6074929fcc540f5b452af"
+  integrity sha512-2MQjaiGqRzUKlLBrq1JK5u2NZMJqDjbzAfKnCIUEF8HaVHF9uL88DQGzrEE0A+4oUV8uyK9xgVHyhnqGSVIhfQ==
+
 "@radix-ui/number@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@radix-ui/number/-/number-1.0.0.tgz#4c536161d0de750b3f5d55860fc3de46264f897b"
