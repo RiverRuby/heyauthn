@@ -1,6 +1,7 @@
 import Head from "next/head"
 import Link from "next/link"
 import { useSemaphore } from "@/contexts/SemaphoreProvider"
+import Question from './question'
 
 import { siteConfig } from "@/config/site"
 import { Layout } from "@/components/layout"
@@ -39,6 +40,7 @@ export default function IndexPage() {
           >
             Documentation
           </Link>
+          <Question />
           <Link
             target="_blank"
             rel="noreferrer"
