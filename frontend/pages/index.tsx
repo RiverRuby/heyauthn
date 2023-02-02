@@ -1,16 +1,13 @@
 import Head from "next/head"
 import Link from "next/link"
 import { useSemaphore } from "@/contexts/SemaphoreProvider"
-import useWebAuthn from "@/hooks/useWebAuthn"
 
 import { siteConfig } from "@/config/site"
 import { Layout } from "@/components/layout"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 
 export default function IndexPage() {
-  const { group, userId } = useSemaphore()
-  const { onAuthenticate } = useWebAuthn()
-  onAuthenticate()
+  const { group, handleAuthenticate, handleRegister, userId } = useSemaphore()
   return (
     <Layout>
       <Head>
@@ -51,7 +48,9 @@ export default function IndexPage() {
             GitHub
           </Link>
         </div>
-        <div>
+        <div className="wrap flex gap-4">
+          <Button onClick={handleRegister}>Register</Button>
+          <Button onClick={handleAuthenticate}>Authenticate</Button>
           <p>Identity: {userId}</p>
         </div>
       </section>

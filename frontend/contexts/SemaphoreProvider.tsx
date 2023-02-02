@@ -1,20 +1,24 @@
-import { createContext, useContext, useEffect } from "react"
+import { createContext, useContext, useEffect, useState } from "react"
 import useLocalStorage from "@/hooks/useLocalStorage"
+import { client } from "@/webauthn.min.js"
 import { Group } from "@semaphore-protocol/group"
 import { Identity } from "@semaphore-protocol/identity"
-import { generateProof, verifyProof } from "@semaphore-protocol/proof"
 
 function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
+  const [credentialId, setCredentialId] = useState("")
+  const isAuthenticated = !!credentialId
+
   // Pass in unique ZKIAP group ID into Group constructor
   // Generate group from database
   const groupSize = 20
   const group = new Group(1, groupSize)
   const [userId, setStoredUser] = useLocalStorage<string>("id", null)
 
-  if (!userId) {
-    // Pass in result of WebAuthn auth into Identity constructor
-    setStoredUser(new Identity("webauthn").toString())
-  }
+  useEffect(() => {
+    if (userId || !isAuthenticated) return
+    setStoredUser(new Identity(credentialId).toString())
+    console.log("SET USER")
+  }, [credentialId, isAuthenticated, setStoredUser, userId])
 
   const handleAddMember = (members: string[]) => {
     group.addMembers(members)
@@ -40,12 +44,41 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
     // return isValid
   }
 
+  const handleRegister = async () => {
+    // probably shouldn't be able to call if credentialId is already set
+    if (credentialId) return
+    if (typeof window === "undefined") return
+
+    // should receive challenge from server
+    const challenge = new Uint8Array(32)
+    window.crypto.getRandomValues(challenge)
+
+    const registration = await client.register(
+      "zkiap-attendee",
+      "randomly-generated-challenge-to-avoid-replay-attacks"
+    )
+    // need type checking here
+    setCredentialId(registration.credential.id)
+  }
+
+  const handleAuthenticate = async () => {
+    // probably shouldn't be able to call if credentialId is already set
+    if (credentialId) return
+    const authentication = await client.authenticate(
+      [],
+      "random-challenge-to-avoid-replay-attacks"
+    )
+    setCredentialId(authentication.credentialId)
+  }
+
   return (
     <SemaphoreContext.Provider
       value={{
         group,
         userId,
         handleAddMember,
+        handleAuthenticate,
+        handleRegister,
       }}
     >
       {children}
@@ -57,6 +90,8 @@ interface SemaphoreContextValue {
   group: Group
   userId: string
   handleAddMember: (members: string[]) => void
+  handleAuthenticate: () => void
+  handleRegister: () => void
 }
 
 const SemaphoreContext = createContext<SemaphoreContextValue | undefined>(
