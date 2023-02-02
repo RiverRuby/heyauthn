@@ -3,6 +3,7 @@ import useLocalStorage from "@/hooks/useLocalStorage"
 import { client } from "@/webauthn.min.js"
 import { Group } from "@semaphore-protocol/group"
 import { Identity } from "@semaphore-protocol/identity"
+import { generateProof, verifyProof } from "@semaphore-protocol/proof"
 
 function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   const [credentialId, setCredentialId] = useState("")
@@ -11,8 +12,11 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   // Pass in unique ZKIAP group ID into Group constructor
   // Generate group from database
   const groupSize = 20
+  const groupId = 1
   const group = new Group(1, groupSize)
   const [userId, setStoredUser] = useLocalStorage<string>("id", null)
+
+  const minAnonSet = 2
 
   useEffect(() => {
     if (userId || !isAuthenticated) return
@@ -25,23 +29,72 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   }
 
   // Signals currently authenticated user
-  const handleSignal = async () => {
+  const handleSignal = async (question: string) => {
     const identity = new Identity(userId)
+
+    const data = {
+      groupId: groupId
+    }
+
+    // fetch all members from the database
+    const getMembers = await fetch("http://localhost:3000/api/members", {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+
+    console.log("Get members", getMembers)
+
+    const res = await getMembers.json()
+    const members = res.body 
+
+    if(members.length < minAnonSet) {
+      console.log("cannot signal!!!")
+    } else {
+      group.addMembers(members);
+    }
+
     const externalNullifier = group.root
     const signal = 1
+
     // fs module not found
-    // const fullProof = await generateProof(
-    //   identity,
-    //   group,
-    //   externalNullifier,
-    //   signal,
-    //   {
-    //     zkeyFilePath: "./semaphore.zkey",
-    //     wasmFilePath: "./semaphore.wasm",
-    //   }
-    // )
-    // const isValid = await verifyProof(fullProof, groupSize)
-    // return isValid
+    const fullProof = await generateProof(
+      identity,
+      group,
+      externalNullifier,
+      signal,
+      {
+        zkeyFilePath: "./semaphore.zkey",
+        wasmFilePath: "./semaphore.wasm",
+      }
+    )
+
+    // verify proof with server and increase reputation
+    const isValid = await verifyProof(fullProof, groupSize)
+
+    // post to discord
+    return isValid
+  }
+
+  const createSemaphoreId = async(sig: string) => {
+    const {nullifier, trapdoor, commitment} = new Identity(sig);
+    const data = {
+      id: commitment, 
+      grp: groupId, 
+      reputation: 0,
+    }
+    // add user to database
+    const addUser = await fetch("http://localhost:3000/api/user", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    }
+    )
+    console.log("Add user status", addUser)
   }
 
   const handleRegister = async () => {
