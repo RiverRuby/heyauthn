@@ -1,14 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import { PrismaClient, User } from "@prisma/client"
+import { PrismaClient } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
-async function query(user: User) {
-  const create = await prisma.user.create({
-    data: user,
+async function query(grp: number) {
+  const users = await prisma.user.findMany({
+    where: { grp: grp },
   })
-
-  console.log(create)
+  return users
 }
 
 export default function handler(
@@ -17,16 +16,18 @@ export default function handler(
 ) {
   const { body } = request
   const b = JSON.parse(body)
+  const groupId = b.groupId
 
-  query(b)
-    .then(async () => {
+  query(groupId)
+    .then(async (users) => {
       await prisma.$disconnect()
+      response.status(200).json({
+        body: users,
+      })
     })
     .catch(async (e) => {
       console.error(e)
       await prisma.$disconnect()
       process.exit(1)
     })
-
-  response.status(200)
 }
