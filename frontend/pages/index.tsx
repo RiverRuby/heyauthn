@@ -1,11 +1,13 @@
 import Head from "next/head"
 import Link from "next/link"
+import { useSemaphore } from "@/contexts/SemaphoreProvider"
 
 import { siteConfig } from "@/config/site"
 import { Layout } from "@/components/layout"
 import { buttonVariants } from "@/components/ui/button"
 
 export default function IndexPage() {
+  const { group, userId } = useSemaphore()
   return (
     <Layout>
       <Head>
@@ -45,6 +47,9 @@ export default function IndexPage() {
           >
             GitHub
           </Link>
+        </div>
+        <div>
+          <p>Identity: {userId}</p>
         </div>
       </section>
     </Layout>
