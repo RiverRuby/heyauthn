@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import useLocalStorage from "@/hooks/useLocalStorage"
-import { client } from "@/webauthn.min.js"
 import { Group } from "@semaphore-protocol/group"
 import { Identity } from "@semaphore-protocol/identity"
 import { generateProof, verifyProof } from "@semaphore-protocol/proof"
+import SimpleWebAuthnBrowser from "@simplewebauthn/browser"
 
 function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   const [credentialId, setCredentialId] = useState("")
@@ -33,27 +33,27 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
     const identity = new Identity(userId)
 
     const data = {
-      groupId: groupId
+      groupId: groupId,
     }
 
     // fetch all members from the database
     const getMembers = await fetch("http://localhost:3000/api/members", {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     })
 
     console.log("Get members", getMembers)
 
     const res = await getMembers.json()
-    const members = res.body 
+    const members = res.body
 
-    if(members.length < minAnonSet) {
+    if (members.length < minAnonSet) {
       console.log("cannot signal!!!")
     } else {
-      group.addMembers(members);
+      group.addMembers(members)
     }
 
     const externalNullifier = group.root
@@ -78,51 +78,44 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
     return isValid
   }
 
-  const createSemaphoreId = async(sig: string) => {
-    const {nullifier, trapdoor, commitment} = new Identity(sig);
+  const createSemaphoreId = async (sig: string) => {
+    const { nullifier, trapdoor, commitment } = new Identity(sig)
     const data = {
-      id: commitment, 
-      grp: groupId, 
+      id: commitment,
+      grp: groupId,
       reputation: 0,
     }
     // add user to database
     const addUser = await fetch("http://localhost:3000/api/user", {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(data)
-    }
-    )
+      body: JSON.stringify(data),
+    })
     console.log("Add user status", addUser)
   }
 
   const handleRegister = async () => {
-    // probably shouldn't be able to call if credentialId is already set
-    if (credentialId) return
-    if (typeof window === "undefined") return
-
-    // should receive challenge from server
-    const challenge = new Uint8Array(32)
-    window.crypto.getRandomValues(challenge)
-
-    const registration = await client.register(
-      "zkiap-attendee",
-      "randomly-generated-challenge-to-avoid-replay-attacks"
-    )
-    // need type checking here
-    setCredentialId(registration.credential.id)
+    const options = generateRegistrationOptions({
+      rpName: "heyauthn",
+      rpID: "localhost", // "heyauthn.xyz"
+      userID: user.id,
+      userName: username,
+      // Don't prompt users for additional information about the authenticator
+      // (Recommended for smoother UX)
+      attestationType: "none",
+      // Prevent users from re-registering existing authenticators
+      excludeCredentials: userAuthenticators.map((authenticator) => ({
+        id: authenticator.credentialID,
+        type: "public-key",
+        // Optional
+        transports: authenticator.transports,
+      })),
+    })
   }
 
-  const handleAuthenticate = async () => {
-    // probably shouldn't be able to call if credentialId is already set
-    if (credentialId) return
-    const authentication = await client.authenticate(
-      [],
-      "random-challenge-to-avoid-replay-attacks"
-    )
-    setCredentialId(authentication.credentialId)
-  }
+  const handleAuthenticate = async () => {}
 
   return (
     <SemaphoreContext.Provider

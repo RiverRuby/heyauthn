@@ -43,6 +43,8 @@
     "@semaphore-protocol/identity": "^3.0.0",
     "@semaphore-protocol/proof": "^3.0.0",
     "@semaphore-protocol/subgraph": "^3.0.0",
+    "@simplewebauthn/browser": "^7.0.1",
+    "@simplewebauthn/server": "^7.0.1",
     "@types/node": "18.11.18",
     "@types/react": "18.0.27",
     "@types/react-dom": "18.0.10",
