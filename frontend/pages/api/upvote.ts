@@ -31,7 +31,6 @@ export default function handler(
       });
 
       console.log(edit)
-
       response.status(200).end()
     })
     .catch(async (error) => {

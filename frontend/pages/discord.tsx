@@ -12,8 +12,14 @@ import {
 export default function Discord() {
   const [messages, setMessages] = useState<Message[]>([])
 
-  async function upvote() {
-    return 1
+  async function upvote(id: string) {
+    console.log(id)
+    const res = await fetch("/api/upvote?messageId=" + id, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
   }
 
   useEffect(() => {
@@ -35,12 +41,12 @@ export default function Discord() {
       <DiscordMessages>
         {messages.map(({ id, message }) => {
           return (
-            <div>
+            <>
             <DiscordMessage author="heyauthn! bot" key={id}>
               {message}
             </DiscordMessage>
-            <Button onClick={upvote}>Upvote</Button>
-            </div>
+            <Button onClick={() => upvote(id)}>Upvote</Button>
+            </>
           )
         })}
       </DiscordMessages>
