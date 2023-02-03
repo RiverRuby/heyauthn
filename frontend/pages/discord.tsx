@@ -33,7 +33,7 @@ export default function Discord() {
       setMessages(data.body)
     }
     fetchMessages()
-  }, [])
+  }, [messages])
 
   if (!messages.length) return <div>loading...</div>
 
