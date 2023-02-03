@@ -13,9 +13,10 @@ async function addMessage(message: string, id: string, timestamp: string) {
   await prisma.message.create({
     data: {
       id,
-      message: message + "Upvotes: 0",
+      message,
       timestamp,
-    } as Message,
+      upvotes: 0,
+    },
   })
 }
 
@@ -44,6 +45,7 @@ export default function handler(
   const proof = body.proof
   const groupSize = body.groupSize
   const message = body.message
+  const upvoteMessage = message + " Upvotes: 0"
 
   verifyProof(proof, groupSize)
     .then((isValid) => {
@@ -51,12 +53,13 @@ export default function handler(
         incrementReputation(semaphoreKey)
           .then(async () => {
             const res = await webhookClient.send({
-              content: message,
+              content: upvoteMessage,
               username: "heyauthn! bot",
               avatarURL: "https://i.imgur.com/AfFp7pu.png",
             })
-            console.log("🚀 ~ .then ~ res", res)
-
+            return res
+          })
+          .then((res) => {
             addMessage(res.content, res.id, res.timestamp)
               .then(() => {
                 return response.status(200).end()
@@ -64,10 +67,6 @@ export default function handler(
               .catch(() => {
                 return response.status(500).end()
               })
-          })
-          .catch(async (e) => {
-            console.error(e)
-            return response.status(500).end()
           })
     })
     .catch(() => {
