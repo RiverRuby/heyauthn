@@ -14,7 +14,7 @@ import { hash } from "@/lib/utils"
 function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   const router = useRouter()
   const groupSize = 20 // 2**20 members
-  const minAnonSet = -1
+  const minAnonSet = 5
   const [groupId, setGroupId] = useState(1)
 
   // Generate WebAuthn credential ID for Semaphore
@@ -47,6 +47,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
     const group = new Group(groupId, groupSize)
     if (members.length < minAnonSet) {
       console.log("Cannot signal yet")
+      return false
     } else {
       const bigIntMembers = members.map((e) => {
         return BigInt(e.semaphorePublicKey)

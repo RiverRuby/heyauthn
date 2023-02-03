@@ -4,6 +4,8 @@ import { Message } from "@prisma/client"
 import {
   DiscordMessage,
   DiscordMessages,
+  DiscordReaction,
+  DiscordReactions,
 } from "@skyra/discord-components-react"
 
 import { Button } from "@/components/ui/button"
@@ -31,7 +33,7 @@ export default function Discord() {
       setMessages(data.body.reverse())
     }
     fetchMessages()
-  }, [])
+  }, [messages])
 
   if (!messages.length) return <div>loading...</div>
 
@@ -43,29 +45,40 @@ export default function Discord() {
         </h1>
         <div className="h-96 flex-col justify-center content-center overflow-auto pr-12 pl-12 w-full">
           <DiscordMessages>
-            {messages.map(({ id, message }, i) => {
+            {messages.map(({ id, message, upvotes }, i) => {
               return (
                 <>
-                  <DiscordMessage author="heyauthn! bot" key={id}>
+                  <DiscordMessage author="heyauthn!" avatar="/heyauthn.png">
                     {message}
+                    <DiscordReactions slot="reactions">
+                      <DiscordReaction
+                        name="🫡"
+                        emoji="/salute.svg"
+                        count={upvotes}
+                        onClick={() => handleUpvote(id, i)}
+                      ></DiscordReaction>
+                    </DiscordReactions>
                   </DiscordMessage>
-                  <div className="flex flex-row-reverse">
+                  {/* <div className="flex flex-row-reverse">
                     <Button
                       disabled={hasUpvoted[i]}
                       onClick={() => handleUpvote(id, i)}
                     >
                       {hasUpvoted[i] ? "👍" : "upvote"}
                     </Button>
-                  </div>
+                  </div> */}
                 </>
               )
             })}
           </DiscordMessages>
         </div>
-        <div className="bottom-0 z-30 flex w-full justify-center py-6 backdrop-blur-sm">
+        <div className="z-30 flex w-full justify-center pt-6 backdrop-blur-sm">
           <Button onClick={() => router.push("/question")}>
-            Ask a question!
+            ask a question!
           </Button>
+        </div>
+        <div className="bottom-0 z-30 flex w-full justify-center pr-6 pb-8 pl-6 pt-2 backdrop-blur-sm">
+          <Button onClick={() => router.push("/discord")}>refresh page!</Button>
         </div>
       </section>
     </>
