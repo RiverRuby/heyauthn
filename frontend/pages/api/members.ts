@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 
 async function query(grp: number) {
   const users = await prisma.user.findMany({
-    where: { grp: grp },
+    where: { groupId: grp },
   })
   return users
 }

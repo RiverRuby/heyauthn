@@ -4,12 +4,12 @@ import { PrismaClient, User } from "@prisma/client"
 const prisma = new PrismaClient()
 
 async function query(user) {
-  const date_now = new Date()
+  const date_now = Date.now().toString()
 
   const create = await prisma.user.create({
     data: {
       ...user,
-      timestamp: date_now.getTime(),
+      timestamp: date_now,
     } as User,
   })
 
@@ -21,10 +21,10 @@ export default function handler(
   response: NextApiResponse
 ) {
   const { body } = request
-  const b = JSON.parse(body)
-  console.log("🚀 ~ b", b)
+  // const b = JSON.parse(body)
+  console.log("🚀 ~ b", body)
 
-  query(b)
+  query(body)
     .then(async () => {
       await prisma.$disconnect()
     })

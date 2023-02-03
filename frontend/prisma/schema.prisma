@@ -15,7 +15,7 @@ model User {
   id  String  @id
   groupId Int  
   reputation Int
-  semaphorePublicKey String
-  timestamp Int
+  semaphorePublicKey String @unique
+  timestamp String
   username String
 }

@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react"
 import useLocalStorage from "@/hooks/useLocalStorage"
 import { Group } from "@semaphore-protocol/group"
 import { Identity } from "@semaphore-protocol/identity"
-import { generateProof, verifyProof } from "@semaphore-protocol/proof"
+import { generateProof } from "@semaphore-protocol/proof"
 import SimpleWebAuthnBrowser, {
   startAuthentication,
   startRegistration,
@@ -48,7 +48,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   }
 
   // Signals currently authenticated user
-  const handleSignal = async (question: string) => {
+  const handleSignal = async (question: string, id: string) => {
     const identity = new Identity(userId)
 
     const data = {
@@ -90,19 +90,32 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
       }
     )
 
-    // verify proof with server and increase reputation
-    const isValid = await verifyProof(fullProof, groupSize)
+    const questionData = {
+      id: id,
+      proof: fullProof,
+      groupSize: groupSize,
+      message: question,
+    }
+    // verify proof with server and increase reputation + post to discord
+    const isValid = await fetch("http://localhost:3000/api/rep", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(questionData),
+    })
 
-    // post to discord
     return isValid
   }
 
   const createSemaphoreId = async (sig: string) => {
     const { nullifier, trapdoor, commitment } = new Identity(sig)
     const data = {
-      id: commitment.toString(),
-      grp: groupId,
+      id: Math.random().toString(),
+      groupId: groupId,
       reputation: 0,
+      semaphorePublicKey: commitment.toString(),
+      username: Math.random().toString()
     }
     // add user to database
     const addUser = await fetch("http://localhost:3000/api/user", {
