@@ -55,7 +55,10 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
     }
 
     const signal = await hash(question)
-    const fullProof = await generateProof(identity, group, groupId, signal, {
+
+    console.log(signal)
+    console.log(identity)
+    const fullProof = await generateProof(identity, group, groupId, "0x" + signal, {
       zkeyFilePath: "./semaphore.zkey",
       wasmFilePath: "./semaphore.wasm",
     })
