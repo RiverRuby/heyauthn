@@ -11,14 +11,16 @@ import { Button } from "@/components/ui/button"
 export default function Discord() {
   const router = useRouter()
   const [messages, setMessages] = useState<Message[]>([])
+  const [hasUpvoted, setHasUpvoted] = useState<boolean[]>(() =>
+    Array(messages.length).fill(false)
+  )
 
-  async function upvote(id: string) {
-    console.log(id)
-    const res = await fetch("/api/upvote?messageId=" + id, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+  async function handleUpvote(id: string, i: number) {
+    await fetch("/api/upvote?messageId=" + id)
+    setHasUpvoted((prev) => {
+      const newState = [...prev]
+      newState[i] = true
+      return newState
     })
   }
 
@@ -40,14 +42,21 @@ export default function Discord() {
           questions!
         </h1>
         <DiscordMessages>
-          {messages.map(({ id, message }) => {
+          {messages.map(({ id, message }, i) => {
             return (
-              <div>
+              <>
                 <DiscordMessage author="heyauthn! bot" key={id}>
                   {message}
                 </DiscordMessage>
-                <Button onClick={() => upvote(id)}>Upvote</Button>
-              </div>
+                <div className="flex flex-row-reverse">
+                  <Button
+                    disabled={hasUpvoted[i]}
+                    onClick={() => handleUpvote(id, i)}
+                  >
+                    {hasUpvoted[i] ? "👍" : "upvote"}
+                  </Button>
+                </div>
+              </>
             )
           })}
         </DiscordMessages>
