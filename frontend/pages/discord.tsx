@@ -41,31 +41,33 @@ export default function Discord() {
         <h1 className="mb-4 text-center text-3xl font-extrabold leading-tight tracking-tighter sm:text-3xl md:text-5xl lg:text-6xl">
           questions!
         </h1>
-        <DiscordMessages>
-          {messages.map(({ id, message }, i) => {
-            return (
-              <>
-                <DiscordMessage author="heyauthn! bot" key={id}>
-                  {message}
-                </DiscordMessage>
-                <div className="flex flex-row-reverse">
-                  <Button
-                    disabled={hasUpvoted[i]}
-                    onClick={() => handleUpvote(id, i)}
-                  >
-                    {hasUpvoted[i] ? "👍" : "upvote"}
-                  </Button>
-                </div>
-              </>
-            )
-          })}
-        </DiscordMessages>
+        <div className="h-full overflow-auto">
+          <DiscordMessages>
+            {messages.map(({ id, message }, i) => {
+              return (
+                <>
+                  <DiscordMessage author="heyauthn! bot" key={id}>
+                    {message}
+                  </DiscordMessage>
+                  <div className="flex flex-row-reverse">
+                    <Button
+                      disabled={hasUpvoted[i]}
+                      onClick={() => handleUpvote(id, i)}
+                    >
+                      {hasUpvoted[i] ? "👍" : "upvote"}
+                    </Button>
+                  </div>
+                </>
+              )
+            })}
+          </DiscordMessages>
+          <div className="bottom-0 z-30 flex w-full justify-center py-6 backdrop-blur-sm">
+            <Button onClick={() => router.push("/question")}>
+              ask a question!
+            </Button>
+          </div>
+        </div>
       </section>
-      <div className="absolute bottom-6 flex w-full justify-center">
-        <Button onClick={() => router.push("/question")}>
-          ask a question!
-        </Button>
-      </div>
     </>
   )
 }
