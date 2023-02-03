@@ -1,18 +1,16 @@
 import { useState } from "react"
 import Head from "next/head"
 import { useSemaphore } from "@/contexts/SemaphoreProvider"
-import Balancer from "react-wrap-balancer"
 
 import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 
 export default function IndexPage() {
   const [username, setUsername] = useState("")
-  const { handleAuthenticate, handleRegister } = useSemaphore()
+  const { handleRegister } = useSemaphore()
   return (
-    <Layout>
+    <>
       <Head>
         <title>heyauthn!</title>
         <meta name="description" content="heyauthn!" />
@@ -32,6 +30,6 @@ export default function IndexPage() {
           <Button onClick={() => handleRegister(username)}>Register</Button>
         </div>
       </section>
-    </Layout>
+    </>
   )
 }

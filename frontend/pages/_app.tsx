@@ -6,6 +6,8 @@ import type { AppProps } from "next/app"
 import { Karla as FontSans } from "@next/font/google"
 import { ThemeProvider } from "next-themes"
 
+import { Layout } from "@/components/layout"
+
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -23,7 +25,9 @@ export default function App({ Component, pageProps }: AppProps) {
       <ThemeProvider attribute="class" defaultTheme="light">
         <SemaphoreProvider>
           <Provider>
-            <Component {...pageProps} />
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
           </Provider>
         </SemaphoreProvider>
       </ThemeProvider>
