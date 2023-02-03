@@ -7,6 +7,7 @@ import {
   DiscordReaction,
   DiscordReactions,
 } from "@skyra/discord-components-react"
+import toast from "react-hot-toast"
 
 import { Button } from "@/components/ui/button"
 
@@ -18,12 +19,16 @@ export default function Discord() {
   )
 
   async function handleUpvote(id: string, i: number) {
-    await fetch("/api/upvote?messageId=" + id)
-    setHasUpvoted((prev) => {
-      const newState = [...prev]
-      newState[i] = true
-      return newState
-    })
+    if (hasUpvoted[i]) {
+      toast.error("cannot upvote twice")
+    } else {
+      await fetch("/api/upvote?messageId=" + id)
+      setHasUpvoted((prev) => {
+        const newState = [...prev]
+        newState[i] = true
+        return newState
+      })
+    }
   }
 
   useEffect(() => {
