@@ -1,22 +1,25 @@
-import { Layout } from "@/components/layout"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { useSemaphore } from "@/contexts/SemaphoreProvider"
+import { useState } from "react"
 
 function Question() {
+  const { handleSignal } = useSemaphore()
+  const [question, setQuestion] = useState('')
+
   async function sendToDiscord() {
-    fetch(
-      "https://discord.com/api/webhooks/1070582208588427284/57lQqRIbWWsC6-T7alxtvT-Zmp-zRG9nxbS8fS1vDwjFImZ9olclqKPkc6g2XIA8_qq_",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          content: "test",
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
+    handleSignal(question)
   }
-  return <Button onClick={sendToDiscord}> Submit Question </Button>
+  return (
+    <div>
+    <h4 className="mt-8 scroll-m-20 text-xl font-semibold tracking-tight">
+      ask your question here :o
+    </h4>
+    <Textarea value={question} onChange={(e) => {setQuestion(e.target.value)}}/>
+    <Button onClick={sendToDiscord}> submit </Button>
+    </div>
+  )
 }
 
 export default Question
