@@ -42,13 +42,6 @@ export default function IndexPage() {
             Documentation
           </Link>
           <Question />
-          <Button
-            onClick={() => {
-              handleSignal("hihi")
-            }}
-          >
-            DISCORDDD
-          </Button>
           <Link
             target="_blank"
             rel="noreferrer"

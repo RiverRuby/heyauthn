@@ -31,7 +31,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   const groupSize = 20
   const groupId = 1
   const group = new Group(1, groupSize)
-  const minAnonSet = 10
+  const minAnonSet = 0
 
   const handleAddMember = (members: string[]) => {
     group.addMembers(members.map((e) => BigInt(e)))
@@ -42,7 +42,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
     // TODO: get user from regenerated sig
     // const identity = new Identity(userId)
     const identity = new Identity(
-      "MEQCIF373DmcKnaKTzc4CM8xbOIkKhvCCuXPPFb9AG5ePjMkAiAtEtEE8jXv3BjxX7J1yYgAWdo8STkWmu-rGDSkpD_ZyQ"
+      "MEYCIQCwV1qbBKJmCljpLtPd_UiJPg3XYoc7Qv2XKNyylsnX_QIhAPoxn0CgyPM7LwgTH30Fl4nGczJ-sB33GHhtrRrEBNFS"
     )
 
     // const data = {
@@ -57,7 +57,6 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
         headers: {
           "Content-Type": "application/json",
         },
-        // body: JSON.stringify(data),
       }
     )
 
@@ -92,9 +91,6 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
       }
     )
 
-    console.log("identity?")
-    console.log(identity)
-
     const questionData = {
       semaphorePublicKey: identity.commitment.toString(),
       proof: fullProof,
@@ -110,7 +106,11 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
       body: JSON.stringify(questionData),
     })
 
-    console.log(isValid)
+    if (isValid.status == 200) {
+      return true
+    } else {
+      return false
+    }
   }
 
   const createSemaphoreId = async (sig: string) => {
@@ -186,7 +186,7 @@ interface SemaphoreContextValue {
   handleAddMember: (members: string[]) => void
   handleAuthenticate: () => void
   handleRegister: (username: string) => void
-  handleSignal: (question: string) => void
+  handleSignal: (question: string) => Promise<boolean>
 }
 
 const SemaphoreContext = createContext<SemaphoreContextValue | undefined>(

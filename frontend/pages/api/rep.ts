@@ -14,7 +14,7 @@ async function query(semaphoreKey: string) {
   if (user) {
     const increaseRep = await prisma.user.update({
       where: { semaphorePublicKey: semaphoreKey },
-      data: { reputation: user.reputation },
+      data: { reputation: user.reputation + 1 },
     })
     console.log(increaseRep)
   } else {
@@ -54,24 +54,25 @@ export default function handler(
                 },
               }
             )
-              .then(() => {
-                response.status(200)
+              .then((e) => {
+                console.log(e.body.getReader())
+                return response.status(200).end()
               })
               .catch(() => {
-                response.status(500)
+                return response.status(500).end()
               })
           })
           .catch(async (e) => {
             console.error(e)
             await prisma.$disconnect()
-            response.status(500)
-            process.exit(1)
+            return response.status(500).end()
+            // process.exit(1)
           })
       }
     })
     .catch(() => {
-      response.status(400)
+      return response.status(400).end()
     })
 
-  response.status(200)
+  return response.status(200).end()
 }
