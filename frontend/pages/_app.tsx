@@ -20,7 +20,7 @@ export default function App({ Component, pageProps }: AppProps) {
 					--font-sans: ${fontSans.style.fontFamily};
 				}
 			}`}</style>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <ThemeProvider attribute="class" defaultTheme="light">
         <SemaphoreProvider>
           <Provider>
             <Component {...pageProps} />
