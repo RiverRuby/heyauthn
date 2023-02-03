@@ -3,11 +3,11 @@ import {
     DiscordMessage,
     DiscordMessages,
   } from "@skyra/discord-components-react";
-import {useEffect} from 'react'
+import {useEffect, useState } from 'react'
 // import {WebhookClient} from "discord.js"
 
 export default function Discord() {
-
+  const [messages, setMessages] = useState([])
 //   const webhookClient = new WebhookClient({ url: "https://discord.com/api/webhooks/1070582208588427284/57lQqRIbWWsC6-T7alxtvT-Zmp-zRG9nxbS8fS1vDwjFImZ9olclqKPkc6g2XIA8_qq_/" });
   useEffect(() => {
     const fetchMsgs = async () => {
@@ -24,7 +24,10 @@ export default function Discord() {
   
   return (
     <div>
-       {/* <DiscordMessages>
+        {/* {
+            for 
+        } */}
+       <DiscordMessages>
         <DiscordMessage author="heyauthn!">
           {" "}
           Hey guys, I'm new here! Glad to be able to join you all!{" "}
@@ -60,7 +63,7 @@ export default function Discord() {
           s!8ball How am I doing today?{" "}
         </DiscordMessage>
         <DiscordMessage profile="skyra"> Yes. </DiscordMessage>
-      </DiscordMessages> */}
+      </DiscordMessages>
     </div>
   )
 }
