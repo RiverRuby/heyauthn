@@ -7,25 +7,27 @@ const webhookClient = new WebhookClient({
   url: process.env.DISCORD_WEBHOOK_URL,
 })
 
-async function upvote(messageId: string) {
+async function upvote(messageId: string, message:string) {
   await prisma.message.update({
     where: { id: messageId },
-    data: { upvotes: { increment: 1 } },
+    data: { upvotes: { increment: 1 },
+    message: message.substring(0, message.length - 1) + (1 + parseInt(message.substring(message.length - 1, message.length))),
+  },
   })
 }
 
-export default function handler(
+export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse
 ) {
   const { query } = request
   const messageId = query.messageId.toString()
   console.log("🚀 ~ messageId", messageId)
+  const message = await webhookClient.fetchMessage(messageId);
 
-  upvote(messageId)
+  upvote(messageId, message.content)
     .then(async () => {
 
-      const message = await webhookClient.fetchMessage(messageId);
       const edit = await webhookClient.editMessage(messageId, {
         content: message.content.substring(0, message.content.length - 1) + (1 + parseInt(message.content.substring(message.content.length - 1, message.content.length))),
       });
