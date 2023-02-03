@@ -8,7 +8,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import Question from "./question"
 
 export default function IndexPage() {
-  const { group, handleAuthenticate, handleRegister, handleSignal } =
+  const { handleAuthenticate, handleRegister, handleSignal, setGroupId } =
     useSemaphore()
   return (
     <Layout>
@@ -59,7 +59,7 @@ export default function IndexPage() {
           </Link>
         </div>
         <div className="wrap flex gap-4">
-          <Button onClick={() => handleRegister("")}>Register</Button>
+          <Button onClick={() => handleRegister("viv")}>Register</Button>
           <Button onClick={handleAuthenticate}>Authenticate</Button>
         </div>
       </section>

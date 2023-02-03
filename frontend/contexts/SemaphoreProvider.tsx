@@ -1,41 +1,17 @@
 import { createContext, useContext, useEffect, useState } from "react"
-import useLocalStorage from "@/hooks/useLocalStorage"
 import { Group } from "@semaphore-protocol/group"
 import { Identity } from "@semaphore-protocol/identity"
 import { generateProof } from "@semaphore-protocol/proof"
-import SimpleWebAuthnBrowser, {
-  startAuthentication,
-  startRegistration,
-} from "@simplewebauthn/browser"
-import { generateRegistrationOptions } from "@simplewebauthn/server"
-import { RegistrationResponseJSON } from "@simplewebauthn/typescript-types"
-
-async function sha256(message) {
-  // encode as UTF-8
-  const msgBuffer = new TextEncoder().encode(message)
-
-  // hash the message
-  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer)
-
-  // convert ArrayBuffer to Array
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-
-  // convert bytes to hex string
-  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
-  return hashHex
-}
+import { startAuthentication, startRegistration } from "@simplewebauthn/browser"
+import {
+  PublicKeyCredentialCreationOptionsJSON,
+  RegistrationResponseJSON,
+} from "@simplewebauthn/typescript-types"
 
 function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
-  // Pass in unique ZKIAP group ID into Group constructor
-  // Generate group from database
-  const groupSize = 20
-  const groupId = 1
-  const group = new Group(1, groupSize)
+  const groupSize = 20 // 2**20 members
   const minAnonSet = 10
-
-  const handleAddMember = (members: string[]) => {
-    group.addMembers(members.map((e) => BigInt(e)))
-  }
+  const [groupId, setGroupId] = useState(1)
 
   // Signals currently authenticated user
   const handleSignal = async (question: string) => {
@@ -45,64 +21,47 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
       "MEQCIF373DmcKnaKTzc4CM8xbOIkKhvCCuXPPFb9AG5ePjMkAiAtEtEE8jXv3BjxX7J1yYgAWdo8STkWmu-rGDSkpD_ZyQ"
     )
 
-    // const data = {
-    //   groupId: groupId,
-    // }
-
     // fetch all members from the database
     const getMembers = await fetch(
-      "/api/members?group_id=" + groupId.toString(),
+      "/api/members?groupId=" + groupId.toString(),
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        // body: JSON.stringify(data),
       }
     )
-
-    console.log("Get members", getMembers)
-
     const res = await getMembers.json()
     const members = res.body
+    console.log("List of members", members)
 
+    // create group
+    const group = new Group(groupId, groupSize)
     if (members.length < minAnonSet) {
-      console.log("cannot signal!!!")
+      console.log("Cannot signal yet")
     } else {
-      console.log(members)
       const bigIntMembers = members.map((e) => {
         return BigInt(e.semaphorePublicKey)
       })
-      console.log(bigIntMembers)
       group.addMembers(bigIntMembers)
     }
 
-    const externalNullifier = group.root
     const signal = 1
+    const fullProof = await generateProof(identity, group, groupId, signal, {
+      zkeyFilePath: "./semaphore.zkey",
+      wasmFilePath: "./semaphore.wasm",
+    })
 
-    // fs module not found
-    const fullProof = await generateProof(
-      identity,
-      group,
-      externalNullifier,
-      signal,
-      {
-        zkeyFilePath: "./semaphore.zkey",
-        wasmFilePath: "./semaphore.wasm",
-      }
-    )
-
-    console.log("identity?")
-    console.log(identity)
-
+    console.log("identity", identity)
     const questionData = {
       semaphorePublicKey: identity.commitment.toString(),
       proof: fullProof,
       groupSize: groupSize,
       message: question,
     }
+
     // verify proof with server and increase reputation + post to discord
-    const isValid = await fetch("/api/rep", {
+    const isValid = await fetch("/api/reputation", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -135,22 +94,37 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   }
 
   const handleRegister = async (username: string) => {
-    const options = generateRegistrationOptions({
-      rpName: "heyauthn",
-      rpID: "localhost", // "heyauthn.xyz"
-      userID: await sha256(username),
-      userName: username,
-      attestationType: "none",
-      // TODO: Prevent users from re-registering existing authenticators
-      // excludeCredentials: userAuthenticators.map((authenticator) => ({
-      //   id: authenticator.credentialID,
-      //   type: "public-key",
-      //   // Optional
-      //   transports: authenticator.transports,
-      // })),
-    })
+    // gets registration options from server
+    const genOptionsResp = await fetch("/api/genOptions?username=" + username, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then((response) => response.json())
+    const options = genOptionsResp.body
+
+    // generates a key pair from the authenticator
     const attResp: RegistrationResponseJSON = await startRegistration(options)
     console.log("🚀 ~ handleRegister ~ attResp", attResp)
+
+    // send to server to verify public key and add to database
+    const verificationResp = await fetch("/api/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        attResp: attResp,
+        expectedChallenge: options.challenge,
+        username: username,
+        groupId: groupId,
+      }),
+    })
+    const verificationJSON = await verificationResp.json()
+
+    if (verificationJSON && verificationJSON.verified) {
+      // do something on success
+    }
   }
 
   const handleAuthenticate = async () => {
@@ -169,11 +143,10 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   return (
     <SemaphoreContext.Provider
       value={{
-        group,
-        handleAddMember,
         handleAuthenticate,
         handleRegister,
         handleSignal,
+        setGroupId,
       }}
     >
       {children}
@@ -182,11 +155,10 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
 }
 
 interface SemaphoreContextValue {
-  group: Group
-  handleAddMember: (members: string[]) => void
   handleAuthenticate: () => void
   handleRegister: (username: string) => void
   handleSignal: (question: string) => void
+  setGroupId: (id: number) => void
 }
 
 const SemaphoreContext = createContext<SemaphoreContextValue | undefined>(

@@ -1,20 +1,19 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import { PrismaClient } from "@prisma/client"
 import { verifyProof } from "@semaphore-protocol/proof"
 
-const prisma = new PrismaClient()
+import prisma from "@/lib/prisma"
 
 async function query(semaphoreKey: string) {
-  const user = await prisma.user.findUnique({
-    where: { 
-      semaphorePublicKey: semaphoreKey 
+  const user = await prisma.user.findFirst({
+    where: {
+      semaphorePublicKey: semaphoreKey,
     },
   })
 
   if (user) {
     const increaseRep = await prisma.user.update({
-      where: { semaphorePublicKey: semaphoreKey },
-      data: { reputation: user.reputation },
+      where: { id: user.id },
+      data: { reputation: user.reputation + 1 },
     })
     console.log(increaseRep)
   } else {
@@ -32,7 +31,7 @@ export default function handler(
   const proof = body.proof
   const groupSize = body.groupSize
   const message = body.message
-  
+
   // verify user passed in proof
   verifyProof(proof, groupSize)
     .then((valid) => {
@@ -40,7 +39,6 @@ export default function handler(
         // increase reputation in database
         query(semaphoreKey)
           .then(async () => {
-            await prisma.$disconnect()
             // send question to discord
             fetch(
               "https://discord.com/api/webhooks/1070582208588427284/57lQqRIbWWsC6-T7alxtvT-Zmp-zRG9nxbS8fS1vDwjFImZ9olclqKPkc6g2XIA8_qq_",
@@ -63,7 +61,6 @@ export default function handler(
           })
           .catch(async (e) => {
             console.error(e)
-            await prisma.$disconnect()
             response.status(500)
             process.exit(1)
           })

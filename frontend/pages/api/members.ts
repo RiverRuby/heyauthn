@@ -1,11 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import { PrismaClient } from "@prisma/client"
 
-const prisma = new PrismaClient()
+import prisma from "@/lib/prisma"
 
-async function getMembers(grp: number) {
+async function getMembers(groupId: number) {
   const users = await prisma.user.findMany({
-    where: { groupId: grp },
+    where: { groupId },
   })
   return users
 }
@@ -15,20 +14,18 @@ export default function handler(
   response: NextApiResponse
 ) {
   const { query } = request
-  // const b = JSON.parse(body)
-  const groupId = parseInt(query.group_id as string)
-  console.log(groupId)
+  const groupId = parseInt(query.groupId as string)
+  console.log("/api/members groupId", groupId)
 
   getMembers(groupId)
     .then(async (users) => {
-      await prisma.$disconnect()
       response.status(200).json({
         body: users,
       })
     })
-    .catch(async (e) => {
-      console.error(e)
-      await prisma.$disconnect()
+    .catch(async (error) => {
+      console.error(error)
+      response.status(400).send({ error: error.message })
       process.exit(1)
     })
 }

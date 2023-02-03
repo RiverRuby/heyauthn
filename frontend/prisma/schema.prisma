@@ -12,10 +12,12 @@ datasource db {
 }
 
 model User {
-  id  String  @id
-  groupId Int  
-  reputation Int
-  semaphorePublicKey String @unique
-  timestamp String
+  id  Int @id @default(autoincrement())
   username String
+  reputation Int
+  semaphorePublicKey String
+  authCredential String
+  authPubkey String
+  timestamp String
+  groupId Int  
 }
