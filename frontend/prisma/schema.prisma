@@ -13,8 +13,9 @@ datasource db {
 
 model User {
   id  String  @id
-  username String
-  grp Int  
+  groupId Int  
   reputation Int
+  semaphorePublicKey String
   timestamp Int
+  username String
 }

@@ -3,7 +3,26 @@ import useLocalStorage from "@/hooks/useLocalStorage"
 import { Group } from "@semaphore-protocol/group"
 import { Identity } from "@semaphore-protocol/identity"
 import { generateProof, verifyProof } from "@semaphore-protocol/proof"
-import SimpleWebAuthnBrowser from "@simplewebauthn/browser"
+import SimpleWebAuthnBrowser, {
+  startAuthentication,
+  startRegistration,
+} from "@simplewebauthn/browser"
+import { generateRegistrationOptions } from "@simplewebauthn/server"
+
+async function sha256(message) {
+  // encode as UTF-8
+  const msgBuffer = new TextEncoder().encode(message)
+
+  // hash the message
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer)
+
+  // convert ArrayBuffer to Array
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+
+  // convert bytes to hex string
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
+  return hashHex
+}
 
 function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   const [credentialId, setCredentialId] = useState("")
@@ -81,7 +100,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   const createSemaphoreId = async (sig: string) => {
     const { nullifier, trapdoor, commitment } = new Identity(sig)
     const data = {
-      id: commitment,
+      id: commitment.toString(),
       grp: groupId,
       reputation: 0,
     }
@@ -97,25 +116,43 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   }
 
   const handleRegister = async () => {
+    const username = "ALICE"
     const options = generateRegistrationOptions({
       rpName: "heyauthn",
       rpID: "localhost", // "heyauthn.xyz"
-      userID: user.id,
-      userName: username,
+      userID: await sha256(username),
+      userName: "ALICE",
       // Don't prompt users for additional information about the authenticator
       // (Recommended for smoother UX)
       attestationType: "none",
       // Prevent users from re-registering existing authenticators
-      excludeCredentials: userAuthenticators.map((authenticator) => ({
-        id: authenticator.credentialID,
-        type: "public-key",
-        // Optional
-        transports: authenticator.transports,
-      })),
+      // TODO: Implement this
+      // excludeCredentials: userAuthenticators.map((authenticator) => ({
+      //   id: authenticator.credentialID,
+      //   type: "public-key",
+      //   // Optional
+      //   transports: authenticator.transports,
+      // })),
     })
+    const attResp = await startRegistration(options)
+    console.log("🚀 ~ handleRegister ~ attResp", attResp)
+    // note: have username
+    // 1. Register user's passkey
+    // 2. Write username and passkey public key to database
   }
 
-  const handleAuthenticate = async () => {}
+  const handleAuthenticate = async () => {
+    // note: do not have username
+    // 3. Get signature of user by authenticating
+    // 4. Write user's Semaphore ID to database
+    const options = await fetch("/api/generate-auth", {
+      method: "GET",
+    }).then((response) => response.json())
+    console.log("🚀 ~ handleAuthenticate ~ options", options)
+    const asseResp = await startAuthentication(options)
+    console.log("🚀 ~ handleAuthenticate ~ asseResp", asseResp)
+    createSemaphoreId(asseResp.response.signature)
+  }
 
   return (
     <SemaphoreContext.Provider
