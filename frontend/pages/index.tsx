@@ -1,14 +1,14 @@
 import Head from "next/head"
 import Link from "next/link"
 import { useSemaphore } from "@/contexts/SemaphoreProvider"
-import Question from './question'
 
 import { siteConfig } from "@/config/site"
 import { Layout } from "@/components/layout"
 import { Button, buttonVariants } from "@/components/ui/button"
+import Question from "./question"
 
 export default function IndexPage() {
-  const { group, handleAuthenticate, handleRegister, userId } = useSemaphore()
+  const { group, handleAuthenticate, handleRegister } = useSemaphore()
   return (
     <Layout>
       <Head>
@@ -53,7 +53,6 @@ export default function IndexPage() {
         <div className="wrap flex gap-4">
           <Button onClick={handleRegister}>Register</Button>
           <Button onClick={handleAuthenticate}>Authenticate</Button>
-          <p>Identity: {userId}</p>
         </div>
       </section>
     </Layout>
