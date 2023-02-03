@@ -20,21 +20,16 @@ export default function IndexPage() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <section className="container flex h-screen flex-col items-center justify-center gap-6 pt-6 pb-8 md:py-10">
-        <Balancer>
-          <h1 className="text-3xl font-extrabold leading-tight tracking-tighter sm:text-3xl md:text-5xl lg:text-6xl">
-            heyauthn!
-          </h1>
-        </Balancer>
-        <div className="wrap flex flex-col gap-4">
-          <div>
-            <Label htmlFor="text">Username</Label>
-            <Input
-              onChange={(e) => setUsername(e.target.value)}
-              value={username}
-            />
-          </div>
+        <h1 className="text-3xl font-extrabold leading-tight tracking-tighter sm:text-3xl md:text-5xl lg:text-6xl">
+          heyauthn!
+        </h1>
+        <div className="wrap flex flex-col gap-6">
+          <Input
+            onChange={(e) => setUsername(e.target.value)}
+            value={username}
+            placeholder="Username"
+          />
           <Button onClick={() => handleRegister(username)}>Register</Button>
-          <Button onClick={handleAuthenticate}>Authenticate</Button>
         </div>
       </section>
     </Layout>
