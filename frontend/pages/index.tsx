@@ -1,14 +1,15 @@
 import Head from "next/head"
 import Link from "next/link"
 import { useSemaphore } from "@/contexts/SemaphoreProvider"
-import Question from './question'
 
 import { siteConfig } from "@/config/site"
 import { Layout } from "@/components/layout"
 import { Button, buttonVariants } from "@/components/ui/button"
+import Question from "./question"
 
 export default function IndexPage() {
-  const { group, handleAuthenticate, handleRegister, handleSignal, userId } = useSemaphore()
+  const { group, handleAuthenticate, handleRegister, handleSignal } =
+    useSemaphore()
   return (
     <Layout>
       <Head>
@@ -41,7 +42,13 @@ export default function IndexPage() {
             Documentation
           </Link>
           <Question />
-          <Button onClick={() => {handleSignal("hihi")}}>DISCORDDD</Button>
+          <Button
+            onClick={() => {
+              handleSignal("hihi")
+            }}
+          >
+            DISCORDDD
+          </Button>
           <Link
             target="_blank"
             rel="noreferrer"
@@ -52,9 +59,8 @@ export default function IndexPage() {
           </Link>
         </div>
         <div className="wrap flex gap-4">
-          <Button onClick={handleRegister}>Register</Button>
+          <Button onClick={() => handleRegister("")}>Register</Button>
           <Button onClick={handleAuthenticate}>Authenticate</Button>
-          <p>Identity: {userId}</p>
         </div>
       </section>
     </Layout>
