@@ -1,4 +1,5 @@
 import { SemaphoreProvider } from "@/contexts/SemaphoreProvider"
+import { Provider } from "react-wrap-balancer"
 
 import "@/styles/globals.css"
 import type { AppProps } from "next/app"
@@ -21,7 +22,9 @@ export default function App({ Component, pageProps }: AppProps) {
 			}`}</style>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <SemaphoreProvider>
-          <Component {...pageProps} />
+          <Provider>
+            <Component {...pageProps} />
+          </Provider>
         </SemaphoreProvider>
       </ThemeProvider>
     </>
