@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useState } from "react"
+import { useRouter } from "next/router"
 import { Group } from "@semaphore-protocol/group"
 import { Identity } from "@semaphore-protocol/identity"
 import { generateProof } from "@semaphore-protocol/proof"
@@ -6,12 +7,12 @@ import { startAuthentication, startRegistration } from "@simplewebauthn/browser"
 import {
   generateAuthenticationOptions,
   generateRegistrationOptions,
-  verifyRegistrationResponse,
 } from "@simplewebauthn/server"
 
 import { hash } from "@/lib/utils"
 
 function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
+  const router = useRouter()
   const groupSize = 20 // 2**20 members
   const minAnonSet = -1
   const [groupId, setGroupId] = useState(1)
@@ -116,6 +117,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
         throw new Error(text)
       })
     }
+    router.push("/question")
   }
 
   return (

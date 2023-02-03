@@ -1,6 +1,4 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import { User } from "@prisma/client"
-import { verifyRegistrationResponse } from "@simplewebauthn/server"
 
 import prisma from "@/lib/prisma"
 
