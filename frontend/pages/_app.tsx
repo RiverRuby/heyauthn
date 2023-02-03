@@ -3,7 +3,7 @@ import { Provider } from "react-wrap-balancer"
 
 import "@/styles/globals.css"
 import type { AppProps } from "next/app"
-import { Inter as FontSans } from "@next/font/google"
+import { Karla as FontSans } from "@next/font/google"
 import { ThemeProvider } from "next-themes"
 
 const fontSans = FontSans({
