@@ -5,7 +5,7 @@ import {
   DiscordMessage,
   DiscordMessages,
   DiscordReaction,
-  DiscordReactions
+  DiscordReactions,
 } from "@skyra/discord-components-react"
 
 import { Button } from "@/components/ui/button"
@@ -51,7 +51,12 @@ export default function Discord() {
                   <DiscordMessage author="heyauthn!" avatar="/heyauthn.png">
                     {message}
                     <DiscordReactions slot="reactions">
-                      <DiscordReaction name="🫡" emoji="/salute.svg" count={upvotes} onClick={() =>handleUpvote(id, i)}></DiscordReaction>
+                      <DiscordReaction
+                        name="🫡"
+                        emoji="/salute.svg"
+                        count={upvotes}
+                        onClick={() => handleUpvote(id, i)}
+                      ></DiscordReaction>
                     </DiscordReactions>
                   </DiscordMessage>
                   {/* <div className="flex flex-row-reverse">
@@ -67,11 +72,14 @@ export default function Discord() {
             })}
           </DiscordMessages>
         </div>
-        <div className="bottom-0 z-30 flex w-full justify-center py-6 backdrop-blur-sm">
-            <Button onClick={() => router.push("/question")}>
-              ask a question!
-            </Button>
-          </div>
+        <div className="z-30 flex w-full justify-center pt-6 backdrop-blur-sm">
+          <Button onClick={() => router.push("/question")}>
+            ask a question!
+          </Button>
+        </div>
+        <div className="bottom-0 z-30 flex w-full justify-center pr-6 pb-8 pl-6 pt-2 backdrop-blur-sm">
+          <Button onClick={() => router.push("/discord")}>refresh page!</Button>
+        </div>
       </section>
     </>
   )
