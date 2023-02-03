@@ -1,43 +1,47 @@
+import { GetStaticProps, InferGetStaticPropsType } from "next"
+import { Message } from "@prisma/client"
 import {
-    DiscordMessage,
-    DiscordMessages,
-  } from "@skyra/discord-components-react";
-import {useEffect, useState } from 'react'
-// import {WebhookClient} from "discord.js"
+  DiscordMessage,
+  DiscordMessages,
+  DiscordReaction,
+  DiscordReactions,
+} from "@skyra/discord-components-react"
 
-export default function Discord() {
-  const [messages, setMessages] = useState([])
-//   const webhookClient = new WebhookClient({ url: "https://discord.com/api/webhooks/1070582208588427284/57lQqRIbWWsC6-T7alxtvT-Zmp-zRG9nxbS8fS1vDwjFImZ9olclqKPkc6g2XIA8_qq_/" });
-  useEffect(() => {
-    const fetchMsgs = async () => {
-        const messages = await fetch(
-            "/api/messages",
-            {
-              method: "GET"
-            }
-          )
-        const msgJson = await messages.json()
-        setMessages(msgJson.body)
-    }
-    fetchMsgs()
-  }, [])
-  
+export default function Discord({
+  messages,
+}: InferGetStaticPropsType<typeof getStaticProps>) {
+  if (!messages.length) return <div>loading...</div>
+
   return (
     <>
       <DiscordMessages>
-        {
-          messages.map(
-            (m) => {
-              return (
-                <DiscordMessage author="heyauthn!">
-                  {" "}
-                  {m.message} {" "}
-                </DiscordMessage>
-              )
-            }
-          )
-        }
+        <DiscordMessage author="heyauthn!">
+          asdf
+          <DiscordReactions slot="reactions">
+            <DiscordReaction
+              name="👍"
+              emoji="/thumbsup.svg"
+              count={1}
+            ></DiscordReaction>
+          </DiscordReactions>
+        </DiscordMessage>
+        {messages &&
+          messages.map((m) => {
+            return (
+              <DiscordMessage author="heyauthn!"> {m.message} </DiscordMessage>
+            )
+          })}
       </DiscordMessages>
     </>
   )
+}
+
+export const getStaticProps: GetStaticProps<{
+  messages: Message[]
+}> = async (context) => {
+  const res = await fetch("http://localhost:3000/api/messages", {
+    method: "GET",
+  })
+  const messages = await res.json()
+  return { props: { messages } }
 }
