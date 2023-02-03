@@ -13,7 +13,7 @@ import { hash } from "@/lib/utils"
 
 function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   const groupSize = 20 // 2**20 members
-  const minAnonSet = 10
+  const minAnonSet = -1
   const [groupId, setGroupId] = useState(1)
 
   // Generate WebAuthn credential ID for Semaphore
@@ -68,7 +68,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
     }
 
     // verify proof with server and increase reputation + post to discord
-    const isValid = await fetch("/api/reputation", {
+    const isValid = await fetch("/api/verify", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
