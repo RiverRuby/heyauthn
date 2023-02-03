@@ -13,9 +13,9 @@ export default function handler(
 ) {
 
   getMessages()
-    .then(async (users) => {
+    .then(async (msgs) => {
       response.status(200).json({
-        body: users,
+        body: msgs,
       })
     })
     .catch(async (error) => {
