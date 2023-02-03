@@ -1,7 +1,12 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { verifyProof } from "@semaphore-protocol/proof"
+import { WebhookClient } from "discord.js"
 
 import prisma from "@/lib/prisma"
+
+const webhookClient = new WebhookClient({
+  url: "https://discord.com/api/webhooks/1070582208588427284/57lQqRIbWWsC6-T7alxtvT-Zmp-zRG9nxbS8fS1vDwjFImZ9olclqKPkc6g2XIA8_qq_",
+})
 
 async function query(semaphoreKey: string) {
   const user = await prisma.user.findFirst({
@@ -40,24 +45,31 @@ export default function handler(
         query(semaphoreKey)
           .then(async () => {
             // send question to discord
-            fetch(
-              "https://discord.com/api/webhooks/1070582208588427284/57lQqRIbWWsC6-T7alxtvT-Zmp-zRG9nxbS8fS1vDwjFImZ9olclqKPkc6g2XIA8_qq_",
-              {
-                method: "POST",
-                body: JSON.stringify({
-                  content: message,
-                }),
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              }
-            )
-              .then(() => {
-                response.status(200)
-              })
-              .catch(() => {
-                response.status(500)
-              })
+            // fetch(
+            //   "",
+            //   {
+            //     method: "POST",
+            //     body: JSON.stringify({
+            //       content: message,
+            //     }),
+            //     headers: {
+            //       "Content-Type": "application/json",
+            //     },
+            //   }
+            // )
+            //   .then((e) => {
+            //     console.log(e.body.getReader())
+            //     return response.status(200).end()
+            //   })
+            //   .catch(() => {
+            //     return response.status(500).end()
+            //   })
+            const res = await webhookClient.send({
+              content: "Webhook test",
+              username: "some-username",
+              avatarURL: "https://i.imgur.com/AfFp7pu.png",
+            })
+            console.log("🚀 ~ .then ~ res", res)
           })
           .catch(async (e) => {
             console.error(e)
@@ -67,8 +79,8 @@ export default function handler(
       }
     })
     .catch(() => {
-      response.status(400)
+      return response.status(400).end()
     })
 
-  response.status(200)
+  return response.status(200).end()
 }

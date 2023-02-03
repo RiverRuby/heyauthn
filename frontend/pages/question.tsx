@@ -1,22 +1,59 @@
-import { Layout } from "@/components/layout"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { useState } from "react"
+import { useSemaphore } from "@/contexts/SemaphoreProvider"
 
-function Question() {
+import { Button, buttonVariants } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { useRouter } from 'next/router'
+import toast, { Toaster } from 'react-hot-toast';
+import Head from "next/head"
+import Balancer from "react-wrap-balancer"
+
+
+function QuestionPage() {
+  const { handleSignal } = useSemaphore()
+  const [question, setQuestion] = useState("")
+  const router = useRouter()
+
   async function sendToDiscord() {
-    fetch(
-      "https://discord.com/api/webhooks/1070582208588427284/57lQqRIbWWsC6-T7alxtvT-Zmp-zRG9nxbS8fS1vDwjFImZ9olclqKPkc6g2XIA8_qq_",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          content: "test",
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
+    const signalResult = await handleSignal(question)
+    if (signalResult) {
+        router.push("/discord")
+    } else {
+        toast.error("failed to send question")
+    }
   }
-  return <Button onClick={sendToDiscord}> Submit Question </Button>
+  return (
+    <>
+      <Head>
+        <title>heyauthn!</title>
+        <meta name="description" content="heyauthn!" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <section className="container flex h-screen flex-col items-center justify-center gap-6 pt-6 pb-8 md:py-10">
+        <h1 className="text-3xl font-extrabold leading-tight tracking-tighter sm:text-3xl md:text-5xl lg:text-6xl">
+          <Balancer>ask/upvote questions!</Balancer>
+        </h1>
+        <div className="wrap flex flex-col gap-4">
+          <div className="wrap flex flex-col gap-2 text-center">
+            <Textarea
+              value={question}
+              onChange={(e) => {
+                setQuestion(e.target.value)
+              }}
+            />
+            <p className="text-sm text-slate-500">
+              <Balancer>
+                Your message will be anonymously posted to Discord.
+              </Balancer>
+            </p>
+          </div>
+          <Button onClick={sendToDiscord}> submit </Button>
+        </div>
+      </section>
+    </>
+  )
 }
 
-export default Question
+export default QuestionPage

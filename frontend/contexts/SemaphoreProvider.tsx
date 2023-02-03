@@ -18,7 +18,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
     // TODO: get user from regenerated sig
     // const identity = new Identity(userId)
     const identity = new Identity(
-      "MEQCIF373DmcKnaKTzc4CM8xbOIkKhvCCuXPPFb9AG5ePjMkAiAtEtEE8jXv3BjxX7J1yYgAWdo8STkWmu-rGDSkpD_ZyQ"
+      "MEYCIQCwV1qbBKJmCljpLtPd_UiJPg3XYoc7Qv2XKNyylsnX_QIhAPoxn0CgyPM7LwgTH30Fl4nGczJ-sB33GHhtrRrEBNFS"
     )
 
     // fetch all members from the database
@@ -69,7 +69,11 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
       body: JSON.stringify(questionData),
     })
 
-    console.log(isValid)
+    if (isValid.status == 200) {
+      return true
+    } else {
+      return false
+    }
   }
 
   const createSemaphoreId = async (sig: string) => {

@@ -21,3 +21,9 @@ model User {
   timestamp String
   groupId Int  
 }
+
+model Message {
+  id String @id 
+  message String
+  timestamp String
+}
