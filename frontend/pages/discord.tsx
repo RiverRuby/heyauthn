@@ -20,28 +20,18 @@ export default function Discord() {
     fetchMessages()
   }, [])
 
-  console.log("🚀 ~ messages", messages)
   if (!messages.length) return <div>loading...</div>
 
   return (
     <>
       <DiscordMessages>
-        <DiscordMessage author="heyauthn!">
-          asdf
-          <DiscordReactions slot="reactions">
-            <DiscordReaction
-              name="👍"
-              emoji="/thumbsup.svg"
-              count={1}
-            ></DiscordReaction>
-          </DiscordReactions>
-        </DiscordMessage>
-        {messages &&
-          messages.map((m) => {
-            return (
-              <DiscordMessage author="heyauthn!"> {m.message} </DiscordMessage>
-            )
-          })}
+        {messages.map(({ id, message }) => {
+          return (
+            <DiscordMessage author="heyauthn!" key={id}>
+              {message}
+            </DiscordMessage>
+          )
+        })}
       </DiscordMessages>
     </>
   )
