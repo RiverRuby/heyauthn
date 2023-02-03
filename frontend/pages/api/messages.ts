@@ -11,7 +11,6 @@ export default function handler(
   request: NextApiRequest,
   response: NextApiResponse
 ) {
-
   getMessages()
     .then(async (msgs) => {
       response.status(200).json({
