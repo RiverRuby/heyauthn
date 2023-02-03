@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { GetStaticProps, InferGetStaticPropsType } from "next"
 import { Message } from "@prisma/client"
+import { Button } from "@/components/ui/button"
 import {
   DiscordMessage,
   DiscordMessages,
@@ -27,9 +28,12 @@ export default function Discord() {
       <DiscordMessages>
         {messages.map(({ id, message }) => {
           return (
+            <div>
             <DiscordMessage author="heyauthn!" key={id}>
               {message}
             </DiscordMessage>
+            <Button></Button>
+            </div>
           )
         })}
       </DiscordMessages>

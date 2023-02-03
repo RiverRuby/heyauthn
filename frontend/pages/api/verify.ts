@@ -55,7 +55,7 @@ export default function handler(
 
   verifyProof(proof, groupSize)
     .then((isValid) => {
-      if (isValid && proof.signal === hash(message))
+      if (isValid && BigInt(proof.signal).toString(16) === hash(message))
         incrementReputation(semaphoreKey)
           .then(async () => {
             const res = await webhookClient.send({
