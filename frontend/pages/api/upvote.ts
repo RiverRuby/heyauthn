@@ -1,6 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next"
+import { WebhookClient } from "discord.js"
 
 import prisma from "@/lib/prisma"
+
+const webhookClient = new WebhookClient({
+  url: process.env.DISCORD_WEBHOOK_URL,
+})
 
 async function upvote(messageId: string) {
   await prisma.message.update({
@@ -18,10 +23,16 @@ export default function handler(
   console.log("🚀 ~ messageId", messageId)
 
   upvote(messageId)
-    .then(async (users) => {
-      response.status(200).json({
-        body: users,
-      })
+    .then(async () => {
+
+      const message = await webhookClient.fetchMessage(messageId);
+      const edit = await webhookClient.editMessage(messageId, {
+        content: message.content.substring(0, message.content.length - 1) + (1 + parseInt(message.content.substring(message.content.length - 1, message.content.length))),
+      });
+
+      console.log(edit)
+
+      response.status(200).end()
     })
     .catch(async (error) => {
       console.error(error)
