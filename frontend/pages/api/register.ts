@@ -9,49 +9,35 @@ export default async function handler(
   response: NextApiResponse
 ) {
   const { body } = request
-  const { attResp, expectedChallenge, username, groupId } = body
+  const { username, groupId, commitment } = body
 
-  // verify the registration response
-  let verification
-  try {
-    verification = await verifyRegistrationResponse({
-      response: attResp,
-      expectedChallenge,
-      expectedOrigin: [
-        "http://localhost:3000",
-        "https://" + process.env.RELAYING_PARTY_ID,
-      ],
-      expectedRPID: process.env.RELAYING_PARTY_ID,
-    })
-  } catch (error) {
-    console.error(error)
-    return response.status(400).send({ error: error.message })
+  // check if user is in database
+  const user = await prisma.user.findFirst({
+    where: {
+      username: username,
+    },
+  })
+  if (user) {
+    response.status(400).send({ error: "Username already taken" })
+    return
   }
-  const { verified } = verification
 
   // add user to database
-  if (verified) {
-    const date_now = Date.now().toString()
-    const { registrationInfo } = verification
-    const { credentialPublicKey, credentialID, counter } = registrationInfo
-
-    const create = await prisma.user.create({
+  const date_now = Date.now().toString()
+  try {
+    await prisma.user.create({
       data: {
         username: username,
         reputation: 0,
-        semaphorePublicKey: "",
-        authCredential: Buffer.from(credentialID).toString("hex"),
-        authPubkey: Buffer.from(credentialPublicKey).toString("hex"),
+        semaphorePublicKey: commitment,
         timestamp: date_now,
         groupId: groupId,
-      } as User,
+      },
     })
+  } catch (error) {
+    console.error(error)
+    response.status(400).send({ error: error.message })
   }
 
-  // respond with verification status
-  response.status(200).json({
-    body: {
-      verified,
-    },
-  })
+  response.status(200)
 }

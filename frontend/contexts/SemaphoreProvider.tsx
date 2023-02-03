@@ -4,22 +4,29 @@ import { Identity } from "@semaphore-protocol/identity"
 import { generateProof } from "@semaphore-protocol/proof"
 import { startAuthentication, startRegistration } from "@simplewebauthn/browser"
 import {
-  PublicKeyCredentialCreationOptionsJSON,
-  RegistrationResponseJSON,
-} from "@simplewebauthn/typescript-types"
+  generateAuthenticationOptions,
+  generateRegistrationOptions,
+  verifyRegistrationResponse,
+} from "@simplewebauthn/server"
+
+import { hash } from "@/lib/utils"
 
 function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   const groupSize = 20 // 2**20 members
   const minAnonSet = 10
   const [groupId, setGroupId] = useState(1)
 
+  // Generate WebAuthn credential ID for Semaphore
+  const genPassword = async () => {
+    const options = generateAuthenticationOptions({})
+    const asseResp = await startAuthentication(options)
+    console.log("authentication resp", asseResp)
+    return asseResp.id
+  }
+
   // Signals currently authenticated user
   const handleSignal = async (question: string) => {
-    // TODO: get user from regenerated sig
-    // const identity = new Identity(userId)
-    const identity = new Identity(
-      "MEYCIQCwV1qbBKJmCljpLtPd_UiJPg3XYoc7Qv2XKNyylsnX_QIhAPoxn0CgyPM7LwgTH30Fl4nGczJ-sB33GHhtrRrEBNFS"
-    )
+    const identity = new Identity(await genPassword())
 
     // fetch all members from the database
     const getMembers = await fetch(
@@ -76,78 +83,44 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
     }
   }
 
-  const createSemaphoreId = async (sig: string) => {
-    console.log("SIGNATURE", sig)
-    const { nullifier, trapdoor, commitment } = new Identity(sig)
-    const data = {
-      id: Math.random().toString(), // TODO: WebAuthn pub key
-      groupId: groupId,
-      reputation: 0,
-      semaphorePublicKey: commitment.toString(),
-      username: Math.random().toString(),
-    }
-    // add user to database
-    const addUser = await fetch("/api/user", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
-    console.log("Add user status", addUser)
-  }
-
   const handleRegister = async (username: string) => {
     // gets registration options from server
-    const genOptionsResp = await fetch("/api/genOptions?username=" + username, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).then((response) => response.json())
-    const options = genOptionsResp.body
+    const optionsResp = await generateRegistrationOptions({
+      rpName: "heyauthn",
+      rpID: process.env.RELAYING_PARTY_ID,
+      userID: await hash(username),
+      userName: username,
+      attestationType: "none",
+    })
 
-    // generates a key pair from the authenticator
-    const attResp: RegistrationResponseJSON = await startRegistration(options)
-    console.log("🚀 ~ handleRegister ~ attResp", attResp)
+    // generates a key pair + credential ID from the authenticator
+    const attResp = await startRegistration(optionsResp)
+    console.log("registration resp", attResp)
+    const { commitment } = new Identity(attResp.id)
 
-    // send to server to verify public key and add to database
-    const verificationResp = await fetch("/api/register", {
+    // post new user and semaphore public key to server
+    const isValid = await fetch("/api/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        attResp: attResp,
-        expectedChallenge: options.challenge,
         username: username,
         groupId: groupId,
+        commitment: commitment.toString(),
       }),
     })
-    const verificationJSON = await verificationResp.json()
 
-    if (verificationJSON && verificationJSON.verified) {
-      // do something on success
+    if (isValid.status !== 200) {
+      isValid.text().then((text) => {
+        throw new Error(text)
+      })
     }
-  }
-
-  const handleAuthenticate = async () => {
-    // note: do not have username
-    // 3. Get signature of user by authenticating
-    // 4. Write user's Semaphore ID to database
-    const options = await fetch("/api/generate-auth", {
-      method: "GET",
-    }).then((response) => response.json())
-    console.log("🚀 ~ handleAuthenticate ~ options", options)
-    const asseResp = await startAuthentication(options)
-    console.log("🚀 ~ handleAuthenticate ~ asseResp", asseResp)
-    createSemaphoreId(asseResp.response.signature)
   }
 
   return (
     <SemaphoreContext.Provider
       value={{
-        handleAuthenticate,
         handleRegister,
         handleSignal,
         setGroupId,
@@ -159,7 +132,6 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
 }
 
 interface SemaphoreContextValue {
-  handleAuthenticate: () => void
   handleRegister: (username: string) => void
   handleSignal: (question: string) => void
   setGroupId: (id: number) => void
