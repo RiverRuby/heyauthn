@@ -19,11 +19,7 @@ async function addMessage(message: string, id: string, timestamp: string) {
   await prisma.message.create({
     data: {
       id,
-<<<<<<< HEAD
-      message: message + " (Anon upvotes: 0)",
-=======
       message,
->>>>>>> 86f6d6fdfcd0d136083536bc620d8c22a6bcad43
       timestamp,
       upvotes: 0,
     },
@@ -78,14 +74,6 @@ export default function handler(
                 return response.status(500).end()
               })
           })
-<<<<<<< HEAD
-          .catch(async (e) => {
-            console.error(e)
-            return response.status(500).end()
-          })
-      }
-=======
->>>>>>> 86f6d6fdfcd0d136083536bc620d8c22a6bcad43
     })
     .catch(() => {
       return response.status(500).end()
