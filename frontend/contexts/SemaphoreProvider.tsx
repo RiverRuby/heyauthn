@@ -61,7 +61,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
     }
 
     // verify proof with server and increase reputation + post to discord
-    const isValid = await fetch("/api/reputation", {
+    const isValid = await fetch("/api/verify", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
