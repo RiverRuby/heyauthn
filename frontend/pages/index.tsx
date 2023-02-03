@@ -1,10 +1,14 @@
+import { useState } from "react"
 import Head from "next/head"
 import { useSemaphore } from "@/contexts/SemaphoreProvider"
 import Balancer from "react-wrap-balancer"
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 export default function IndexPage() {
+  const [username, setUsername] = useState("")
   const { handleAuthenticate, handleRegister } = useSemaphore()
   return (
     <>
@@ -21,7 +25,14 @@ export default function IndexPage() {
           </h1>
         </Balancer>
         <div className="wrap flex flex-col gap-4">
-          <Button onClick={() => handleRegister("")}>Register</Button>
+          <div>
+            <Label htmlFor="text">Username</Label>
+            <Input
+              onChange={(e) => setUsername(e.target.value)}
+              value={username}
+            />
+          </div>
+          <Button onClick={() => handleRegister(username)}>Register</Button>
           <Button onClick={handleAuthenticate}>Authenticate</Button>
         </div>
       </section>
