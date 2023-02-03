@@ -5,6 +5,12 @@ import { WebhookClient } from "discord.js"
 
 import prisma from "@/lib/prisma"
 
+const { createHash } = require("crypto")
+
+function hash(string) {
+  return createHash("sha256").update(string).digest("hex")
+}
+
 const webhookClient = new WebhookClient({
   url: process.env.DISCORD_WEBHOOK_URL,
 })
@@ -13,7 +19,7 @@ async function addMessage(message: string, id: string, timestamp: string) {
   await prisma.message.create({
     data: {
       id,
-      message: message + "Upvotes: 0",
+      message: message + " (Anon upvotes: 0)",
       timestamp,
     } as Message,
   })
@@ -47,7 +53,7 @@ export default function handler(
 
   verifyProof(proof, groupSize)
     .then((isValid) => {
-      if (isValid)
+      if (isValid && proof.signal === hash(message)) {
         incrementReputation(semaphoreKey)
           .then(async () => {
             const res = await webhookClient.send({
@@ -69,6 +75,7 @@ export default function handler(
             console.error(e)
             return response.status(500).end()
           })
+      }
     })
     .catch(() => {
       return response.status(500).end()

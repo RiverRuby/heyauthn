@@ -37,5 +37,5 @@ export default async function handler(
     response.status(400).send({ error: error.message })
   }
 
-  response.status(200)
+  response.status(200).end()
 }

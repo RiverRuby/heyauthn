@@ -54,7 +54,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
       group.addMembers(bigIntMembers)
     }
 
-    const signal = 1
+    const signal = await hash(question)
     const fullProof = await generateProof(identity, group, groupId, signal, {
       zkeyFilePath: "./semaphore.zkey",
       wasmFilePath: "./semaphore.wasm",
