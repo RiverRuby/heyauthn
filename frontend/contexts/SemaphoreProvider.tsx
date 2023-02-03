@@ -10,7 +10,7 @@ import {
 
 function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   const groupSize = 20 // 2**20 members
-  const minAnonSet = 10
+  const minAnonSet = -1
   const [groupId, setGroupId] = useState(1)
 
   // Signals currently authenticated user
