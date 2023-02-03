@@ -25,12 +25,19 @@ function QuestionPage() {
           <Balancer>ask/upvote questions!</Balancer>
         </h1>
         <div className="wrap flex flex-col gap-4">
-          <Textarea
-            value={question}
-            onChange={(e) => {
-              setQuestion(e.target.value)
-            }}
-          />
+          <div className="wrap flex flex-col gap-2 text-center">
+            <Textarea
+              value={question}
+              onChange={(e) => {
+                setQuestion(e.target.value)
+              }}
+            />
+            <p className="text-sm text-slate-500">
+              <Balancer>
+                Your message will be anonymously posted to Discord.
+              </Balancer>
+            </p>
+          </div>
           <Button onClick={sendToDiscord}> submit </Button>
         </div>
       </section>
