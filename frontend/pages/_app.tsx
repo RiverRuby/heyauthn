@@ -5,6 +5,7 @@ import "@/styles/globals.css"
 import type { AppProps } from "next/app"
 import { Karla as FontSans } from "@next/font/google"
 import { ThemeProvider } from "next-themes"
+import { Toaster } from "react-hot-toast"
 
 import { Layout } from "@/components/layout"
 
@@ -22,6 +23,8 @@ export default function App({ Component, pageProps }: AppProps) {
 					--font-sans: ${fontSans.style.fontFamily};
 				}
 			}`}</style>
+      <Toaster position="top-center" reverseOrder={false} />
+
       <ThemeProvider attribute="class" defaultTheme="light">
         <SemaphoreProvider>
           <Provider>

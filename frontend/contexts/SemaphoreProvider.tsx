@@ -91,7 +91,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
     }
   }
 
-  const handleRegister = async (username: string) => {
+  const handleRegister = async (username: string, iykRef: string) => {
     // gets registration options from server
     const optionsResp = await generateRegistrationOptions({
       rpName: "heyauthn",
@@ -102,7 +102,13 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
     })
 
     // generates a key pair + credential ID from the authenticator
-    const attResp = await startRegistration(optionsResp)
+    let attResp
+    try {
+      attResp = await startRegistration(optionsResp)
+    } catch (e) {
+      console.log(e)
+      return
+    }
     console.log("registration resp", attResp)
     const { commitment } = new Identity(attResp.id)
 
@@ -116,15 +122,11 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
         username: username,
         groupId: groupId,
         commitment: commitment.toString(),
+        iykRef: iykRef,
       }),
     })
 
-    if (isValid.status !== 200) {
-      isValid.text().then((text) => {
-        throw new Error(text)
-      })
-    }
-    router.push("/discord")
+    return isValid.status
   }
 
   return (
@@ -141,7 +143,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
 }
 
 interface SemaphoreContextValue {
-  handleRegister: (username: string) => void
+  handleRegister: (username: string, iykRef: string) => Promise<number>
   handleSignal: (question: string) => Promise<Boolean>
   setGroupId: (id: number) => void
 }

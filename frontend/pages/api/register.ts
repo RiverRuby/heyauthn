@@ -7,18 +7,36 @@ export default async function handler(
   response: NextApiResponse
 ) {
   const { body } = request
-  const { username, groupId, commitment } = body
+  const { username, groupId, commitment, iykRef } = body
 
-  // check if user is in database
-  const user = await prisma.user.findFirst({
-    where: {
-      username: username,
+  // check if iykRef is valid
+  const iykResp = await fetch("https://api.iyk.app/refs/" + iykRef, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
     },
   })
-  if (user) {
-    response.status(400).send({ error: "Username already taken" })
+  if (iykResp.status === 404) {
+    response.status(404).end()
     return
+  } else if (iykResp.status === 200) {
+    const iykData = await iykResp.json()
+    if (!iykData.isValidRef) {
+      response.status(400).send({ error: "Invalid iykRef" })
+      return
+    }
   }
+
+  // check if user is in database
+  // const user = await prisma.user.findFirst({
+  //   where: {
+  //     username: username,
+  //   },
+  // })
+  // if (user) {
+  //   response.status(400).send({ error: "Username already taken" })
+  //   return
+  // }
 
   // add user to database
   const date_now = Date.now().toString()

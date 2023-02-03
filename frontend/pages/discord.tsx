@@ -28,7 +28,7 @@ export default function Discord() {
     const fetchMessages = async () => {
       const res = await fetch("/api/messages")
       const data = await res.json()
-      setMessages(data.body)
+      setMessages(data.body.reverse())
     }
     fetchMessages()
   }, [])
@@ -39,9 +39,9 @@ export default function Discord() {
     <>
       <section className="h-screen w-full flex-col items-center gap-6 pt-20 pb-8 md:py-10">
         <h1 className="pt-20 mb-4 text-center text-3xl font-extrabold leading-tight tracking-tighter sm:text-3xl md:text-5xl lg:text-6xl">
-          questions!
+          Question Feed
         </h1>
-        <div className="h-96 flex-col justify-center content-center overflow-auto pr-12 pl-12 w-9/12">
+        <div className="h-96 flex-col justify-center content-center overflow-auto pr-12 pl-12 w-full">
           <DiscordMessages>
             {messages.map(({ id, message }, i) => {
               return (
@@ -63,10 +63,10 @@ export default function Discord() {
           </DiscordMessages>
         </div>
         <div className="bottom-0 z-30 flex w-full justify-center py-6 backdrop-blur-sm">
-            <Button onClick={() => router.push("/question")}>
-              ask a question!
-            </Button>
-          </div>
+          <Button onClick={() => router.push("/question")}>
+            Ask a question!
+          </Button>
+        </div>
       </section>
     </>
   )

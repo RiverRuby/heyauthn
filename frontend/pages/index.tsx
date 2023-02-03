@@ -1,15 +1,38 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Head from "next/head"
 import Image from "next/image"
+import { useRouter } from "next/router"
 import { useSemaphore } from "@/contexts/SemaphoreProvider"
+import toast from "react-hot-toast"
 
-import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 export default function IndexPage() {
   const [username, setUsername] = useState("")
   const { handleRegister } = useSemaphore()
+  const router = useRouter()
+
+  const registrationFlow = async (username: string) => {
+    if (!router.query.iykRef) {
+      toast.error("Please use a valid link from an IYK disk.")
+      return
+    }
+
+    const attemptStatus = await handleRegister(
+      username,
+      router.query.iykRef as string
+    )
+    if (attemptStatus === 404) {
+      toast.error("Please use a valid IYK link.")
+    } else if (attemptStatus === 200) {
+      toast.success("Registration successful!")
+      router.push("/discord")
+    } else {
+      toast.error("Registration failed.")
+    }
+  }
+
   return (
     <>
       <Head>
@@ -29,7 +52,9 @@ export default function IndexPage() {
             value={username}
             placeholder="Name"
           />
-          <Button onClick={() => handleRegister(username)}>Authenticate</Button>
+          <Button onClick={() => registrationFlow(username)}>
+            Authenticate
+          </Button>
         </div>
       </section>
     </>
