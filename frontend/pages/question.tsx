@@ -15,16 +15,16 @@ function QuestionPage() {
   const [question, setQuestion] = useState("")
   const router = useRouter()
 
-  async function sendToDiscord() {
+  async function postQuestion() {
     const signalResult = await handleSignal(question)
     if (signalResult) {
-      router.push("/discord")
+      // router.push("/discord")
     } else {
       toast.error("failed to send question")
     }
   }
   return (
-    <Layout>
+    <>
       <Head>
         <title>heyauthn!</title>
         <meta name="description" content="heyauthn!" />
@@ -46,11 +46,11 @@ function QuestionPage() {
               placeholder="Anonymously ask a question!"
             />
           </div>
-          <Button onClick={sendToDiscord}> Submit </Button>
+          <Button onClick={postQuestion}>Submit</Button>
           <Button onClick={() => router.push("/discord")}> Back </Button>
         </div>
       </section>
-    </Layout>
+    </>
   )
 }
 

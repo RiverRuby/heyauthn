@@ -56,10 +56,16 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
 
     const signal = await hash(question)
 
-    const fullProof = await generateProof(identity, group, groupId, "0x" + signal, {
-      zkeyFilePath: "./semaphore.zkey",
-      wasmFilePath: "./semaphore.wasm",
-    })
+    const fullProof = await generateProof(
+      identity,
+      group,
+      groupId,
+      "0x" + signal,
+      {
+        zkeyFilePath: "./semaphore.zkey",
+        wasmFilePath: "./semaphore.wasm",
+      }
+    )
 
     console.log("identity", identity)
     const questionData = {
@@ -118,7 +124,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
         throw new Error(text)
       })
     }
-    router.push("/question")
+    router.push("/discord")
   }
 
   return (
@@ -136,7 +142,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
 
 interface SemaphoreContextValue {
   handleRegister: (username: string) => void
-  handleSignal: (question: string) => void
+  handleSignal: (question: string) => Promise<Boolean>
   setGroupId: (id: number) => void
 }
 
