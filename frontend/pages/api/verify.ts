@@ -13,7 +13,7 @@ async function addMessage(message: string, id: string, timestamp: string) {
   await prisma.message.create({
     data: {
       id,
-      message,
+      message: message + "Upvotes: 0",
       timestamp,
     } as Message,
   })
