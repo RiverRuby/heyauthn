@@ -87,7 +87,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
     // gets registration options from server
     const optionsResp = await generateRegistrationOptions({
       rpName: "heyauthn",
-      rpID: process.env.RELAYING_PARTY_ID,
+      rpID: window.location.hostname,
       userID: await hash(username),
       userName: username,
       attestationType: "none",
