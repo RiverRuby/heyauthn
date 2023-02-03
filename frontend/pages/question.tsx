@@ -19,6 +19,8 @@ function QuestionPage() {
     const signalResult = await handleSignal(question)
     if (signalResult) {
       // router.push("/discord")
+      console.log("getting result")
+      toast.success("sent question to discord")
     } else {
       toast.error("failed to send question")
     }
@@ -32,6 +34,7 @@ function QuestionPage() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <section className="container flex h-screen flex-col items-center justify-center gap-6 pt-6 pb-8 md:py-10">
+        <Toaster/>
         <div className="flex justify-center">
           <Image src="/heyauthn.png" alt="heyauthn!" width="225" height="162" />
         </div>
