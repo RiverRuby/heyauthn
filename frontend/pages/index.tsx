@@ -29,7 +29,7 @@ export default function IndexPage() {
             value={username}
             placeholder="Name"
           />
-          <Button onClick={() => handleRegister(username)}>Register</Button>
+          <Button onClick={() => handleRegister(username)}>Authenticate</Button>
         </div>
       </section>
     </>
