@@ -11,11 +11,15 @@ async function query(semaphoreKey: string) {
     },
   })
 
-  const increaseRep = await prisma.user.update({
-    where: { semaphorePublicKey: semaphoreKey },
-    data: { reputation: user.reputation },
-  })
-  console.log(increaseRep)
+  if (user) {
+    const increaseRep = await prisma.user.update({
+      where: { semaphorePublicKey: semaphoreKey },
+      data: { reputation: user.reputation },
+    })
+    console.log(increaseRep)
+  } else {
+    throw new Error("User not found")
+  }
 }
 
 export default function handler(
@@ -23,18 +27,18 @@ export default function handler(
   response: NextApiResponse
 ) {
   const { body } = request
-  const b = JSON.parse(body)
-  const id: string = b.id
-  const proof = b.proof
-  const groupSize = b.groupSize
-  const message = b.message
+  // const b = JSON.parse(body)
+  const semaphoreKey: string = body.semaphorePublicKey
+  const proof = body.proof
+  const groupSize = body.groupSize
+  const message = body.message
   
   // verify user passed in proof
   verifyProof(proof, groupSize)
     .then((valid) => {
       if (valid) {
         // increase reputation in database
-        query(id)
+        query(semaphoreKey)
           .then(async () => {
             await prisma.$disconnect()
             // send question to discord

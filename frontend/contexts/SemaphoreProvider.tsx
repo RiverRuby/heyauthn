@@ -34,25 +34,32 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
   const minAnonSet = 10
 
   const handleAddMember = (members: string[]) => {
-    group.addMembers(members)
+    group.addMembers(members.map((e) => BigInt(e)))
   }
 
   // Signals currently authenticated user
-  const handleSignal = async (question: string, id: string) => {
-    const identity = new Identity(id)
+  const handleSignal = async (question: string) => {
+    // TODO: get user from regenerated sig
+    // const identity = new Identity(userId)
+    const identity = new Identity(
+      "MEQCIF373DmcKnaKTzc4CM8xbOIkKhvCCuXPPFb9AG5ePjMkAiAtEtEE8jXv3BjxX7J1yYgAWdo8STkWmu-rGDSkpD_ZyQ"
+    )
 
-    const data = {
-      groupId: groupId,
-    }
+    // const data = {
+    //   groupId: groupId,
+    // }
 
     // fetch all members from the database
-    const getMembers = await fetch("/api/members", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
+    const getMembers = await fetch(
+      "/api/members?group_id=" + groupId.toString(),
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // body: JSON.stringify(data),
+      }
+    )
 
     console.log("Get members", getMembers)
 
@@ -62,7 +69,12 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
     if (members.length < minAnonSet) {
       console.log("cannot signal!!!")
     } else {
-      group.addMembers(members)
+      console.log(members)
+      const bigIntMembers = members.map((e) => {
+        return BigInt(e.semaphorePublicKey)
+      })
+      console.log(bigIntMembers)
+      group.addMembers(bigIntMembers)
     }
 
     const externalNullifier = group.root
@@ -80,25 +92,29 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
       }
     )
 
+    console.log("identity?")
+    console.log(identity)
+
     const questionData = {
-      id: id,
+      semaphorePublicKey: identity.commitment.toString(),
       proof: fullProof,
       groupSize: groupSize,
       message: question,
     }
     // verify proof with server and increase reputation + post to discord
     const isValid = await fetch("/api/rep", {
-      method: "GET",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(questionData),
     })
 
-    return isValid
+    console.log(isValid)
   }
 
   const createSemaphoreId = async (sig: string) => {
+    console.log("SIGNATURE", sig)
     const { nullifier, trapdoor, commitment } = new Identity(sig)
     const data = {
       id: Math.random().toString(), // TODO: WebAuthn pub key
@@ -157,6 +173,7 @@ function SemaphoreProvider({ children }: { children?: React.ReactNode }) {
         handleAddMember,
         handleAuthenticate,
         handleRegister,
+        handleSignal,
       }}
     >
       {children}
@@ -169,6 +186,7 @@ interface SemaphoreContextValue {
   handleAddMember: (members: string[]) => void
   handleAuthenticate: () => void
   handleRegister: (username: string) => void
+  handleSignal: (question: string) => void
 }
 
 const SemaphoreContext = createContext<SemaphoreContextValue | undefined>(
