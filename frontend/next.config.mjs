@@ -10,7 +10,9 @@ const nextConfig = {
     ],
   },
   webpack: (config) => {
-    config.resolve.fallback = { fs: false }
+    config.resolve.fallback = { fs: false,
+      extensions: [],
+    }
 
     return config
   },

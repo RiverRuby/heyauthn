@@ -50,6 +50,7 @@
     "@types/node": "18.11.18",
     "@types/react": "18.0.27",
     "@types/react-dom": "18.0.10",
+    "browserify": "^17.0.0",
     "class-variance-authority": "^0.4.0",
     "clsx": "^1.2.1",
     "discord.js": "^14.7.1",

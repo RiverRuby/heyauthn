@@ -4,6 +4,8 @@ import { Message } from "@prisma/client"
 import {
   DiscordMessage,
   DiscordMessages,
+  DiscordReaction,
+  DiscordReactions
 } from "@skyra/discord-components-react"
 
 import { Button } from "@/components/ui/button"
@@ -43,20 +45,23 @@ export default function Discord() {
         </h1>
         <div className="h-96 flex-col justify-center content-center overflow-auto pr-12 pl-12 w-9/12">
           <DiscordMessages>
-            {messages.map(({ id, message }, i) => {
+            {messages.map(({ id, message, upvotes }, i) => {
               return (
                 <>
-                  <DiscordMessage author="heyauthn! bot" key={id}>
+                  <DiscordMessage author="heyauthn!" avatar="/heyauthn.png">
                     {message}
+                    <DiscordReactions slot="reactions">
+                      <DiscordReaction name="🫡" emoji="/salute.svg" count={upvotes} onClick={() =>handleUpvote(id, i)}></DiscordReaction>
+                    </DiscordReactions>
                   </DiscordMessage>
-                  <div className="flex flex-row-reverse">
+                  {/* <div className="flex flex-row-reverse">
                     <Button
                       disabled={hasUpvoted[i]}
                       onClick={() => handleUpvote(id, i)}
                     >
                       {hasUpvoted[i] ? "👍" : "upvote"}
                     </Button>
-                  </div>
+                  </div> */}
                 </>
               )
             })}
