@@ -8,7 +8,7 @@ import { Layout } from "@/components/layout"
 import { Button, buttonVariants } from "@/components/ui/button"
 
 export default function IndexPage() {
-  const { group, handleAuthenticate, handleRegister, userId } = useSemaphore()
+  const { group, handleAuthenticate, handleRegister, handleSignal, userId } = useSemaphore()
   return (
     <Layout>
       <Head>
@@ -41,6 +41,7 @@ export default function IndexPage() {
             Documentation
           </Link>
           <Question />
+          <Button onClick={() => {handleSignal("hihi")}}>DISCORDDD</Button>
           <Link
             target="_blank"
             rel="noreferrer"
